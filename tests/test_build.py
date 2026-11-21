@@ -35,6 +35,27 @@ class BuildTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "one public-plugin root"):
             build.validate_zip(data.getvalue(), self.plugin, self.version)
 
+    def test_zip_excludes_maintainer_distribution_rules(self):
+        self.assertTrue((build.ROOT / "core/DISTRIBUTION.md").is_file())
+        with ZipFile(io.BytesIO(self.outputs[self.zip_path])) as archive:
+            self.assertNotIn(
+                "public-plugin/skills/polyrefine/references/DISTRIBUTION.md",
+                archive.namelist(),
+            )
+
+    def test_zip_rejects_restricted_text_in_nested_reference(self):
+        path = "skills/polyrefine/references/MASTER-RULES.md"
+        for text in (b"Available for FrEe.", b"An unPoRtAbLe example."):
+            with self.subTest(text=text):
+                plugin = self.plugin | {path: text}
+                message = f"Restricted text in plugin file: public-plugin/{path}"
+                with self.assertRaisesRegex(ValueError, re.escape(message)):
+                    build.validate_zip(build.make_zip(plugin), plugin, self.version)
+
+    def test_zip_accepts_free_as_part_of_a_word(self):
+        plugin = self.plugin | {"skills/polyrefine/references/MASTER-RULES.md": b"Freedom"}
+        build.validate_zip(build.make_zip(plugin), plugin, self.version)
+
     def test_listing_rejects_excessive_short_description(self):
         manifest = json.loads(self.plugin["plugin.json"])
         manifest["extensions"]["com.openai"]["interface"]["shortDescription"] = "x" * 31

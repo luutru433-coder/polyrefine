@@ -22,10 +22,10 @@ RULES = (
     "SOFT-ALTERNATIVE.md",
     "OUTPUT-CONTRACT.md",
 )
-DIST_RULE = "DISTRIBUTION.md"
 LISTING_RESTRICTION = re.compile(
     r"\b(?:free|portable pack|pricing|paid plan|subscription)\b", re.IGNORECASE
 )
+PLUGIN_TEXT_RESTRICTION = re.compile(r"\bfree\b|portable", re.IGNORECASE)
 
 
 def require(condition, message):
@@ -111,10 +111,13 @@ def validate_zip(data, plugin, version):
             "ZIP must contain only the expected files under one public-plugin root",
         )
         require(archive.testzip() is None, "ZIP has a corrupted member")
-        manifest = json.loads(archive.read("public-plugin/plugin.json"))
+        actual = {path: archive.read(path) for path in names}
+        for path, contents in actual.items():
+            require(not PLUGIN_TEXT_RESTRICTION.search(contents.decode("utf-8")),
+                    f"Restricted text in plugin file: {path}")
+        manifest = json.loads(actual["public-plugin/plugin.json"])
         validate_manifest(manifest, version)
-        require(all(archive.read(path) == contents for path, contents in expected.items()),
-                "ZIP contents differ from the current skill or listing")
+        require(actual == expected, "ZIP contents differ from the current skill or listing")
 
 
 def build_outputs():
@@ -122,11 +125,11 @@ def build_outputs():
     manifest = json.loads(read("templates/plugin.json"))
     manifest["version"] = version
     validate_manifest(manifest, version)
-    rules = {name: read(f"core/{name}") for name in (*RULES, DIST_RULE)}
+    rules = {name: read(f"core/{name}") for name in RULES}
     skill = read("templates/SKILL.md")
     require(skill.startswith("---\nname: polyrefine\ndescription: "), "Invalid skill frontmatter")
     require(set(re.findall(r"\(references/([^()]+)\)", skill)) == set(rules),
-            "Skill must reference every canonical rule document")
+            "Skill must reference exactly the runtime rule documents")
 
     plugin = {
         "plugin.json": (json.dumps(manifest, indent=2, ensure_ascii=False) + "\n").encode(),

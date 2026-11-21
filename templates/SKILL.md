@@ -15,4 +15,3 @@ Before responding, read these local references and execute the pipeline in Maste
 - [Rewrite Detection](references/REWRITE-DETECTION.md)
 - [Soft Alternative](references/SOFT-ALTERNATIVE.md)
 - [Output Contract](references/OUTPUT-CONTRACT.md)
-- [Distribution](references/DISTRIBUTION.md)
