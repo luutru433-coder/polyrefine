@@ -1,0 +1,24 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "polyrefine",
+  "description": "A structured translation and refinement workflow that preserves meaning.",
+  "repository": "https://github.com/luutru433-coder/polyrefine",
+  "license": "MIT",
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "PolyRefine Translator",
+        "shortDescription": "Meaning-first translation",
+        "longDescription": "PolyRefine Translator runs a repeatable refinement and translation workflow rather than a one-off translation. Semantic Lock checks who did what, when, and with what certainty or obligation, and checks that identifiers survive unchanged. Materially ambiguous pronouns get separate, labeled interpretations instead of a guessed subject. Rewrite detection distinguishes new text from a requested edit and regenerates only the applicable languages from the revised source. A fixed output contract gives you copy-ready English, Japanese and Simplified Chinese for English and Vietnamese input, or English for reverse translation, unless you request another target.",
+        "category": "Productivity",
+        "supportURL": "https://github.com/luutru433-coder/polyrefine/issues",
+        "privacyPolicyURL": "https://github.com/luutru433-coder/polyrefine/blob/main/PRIVACY.md",
+        "defaultPrompt": [
+          "Refine and translate: I need your help with order B-007.",
+          "Translate to English: 予約はまだ確認されていません。",
+          "Refine and translate: Anh đã gửi tài liệu cho em rồi."
+        ]
+      }
+    }
+  }
+}
